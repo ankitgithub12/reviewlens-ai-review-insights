@@ -1,5 +1,13 @@
 import { useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { suggestReply } from '../api.js';
+
+const swap = {
+  initial: { opacity: 0, y: 8, scale: 0.98 },
+  animate: { opacity: 1, y: 0, scale: 1 },
+  exit: { opacity: 0, y: -8, scale: 0.98 },
+  transition: { duration: 0.25 },
+};
 
 /** Suggested reply is generated only when the user clicks, never upfront. */
 export default function ReplyCell({ review }) {
@@ -22,24 +30,47 @@ export default function ReplyCell({ review }) {
     setTimeout(() => setCopied(false), 1500);
   }
 
-  if (state.status === 'done') {
-    return (
-      <div className="reply">
-        <p>{state.reply}</p>
-        <button type="button" className="btn btn-small" onClick={copy}>
-          {copied ? 'Copied' : 'Copy'}
-        </button>
-      </div>
-    );
-  }
-
   return (
     <div className="reply">
-      <span className="pill pill-negative">Needs reply</span>
-      <button type="button" className="btn btn-small" onClick={generate} disabled={state.status === 'loading'}>
-        {state.status === 'loading' ? 'Writing…' : 'Suggest reply'}
-      </button>
-      {state.status === 'error' && <p className="error-text small">{state.error}</p>}
+      <AnimatePresence mode="wait" initial={false}>
+        {state.status === 'done' ? (
+          <motion.div key="done" className="reply-bubble" {...swap}>
+            <p>{state.reply}</p>
+            <motion.button type="button" className="btn btn-small" onClick={copy} whileTap={{ scale: 0.92 }}>
+              {copied ? '✓ Copied' : 'Copy'}
+            </motion.button>
+          </motion.div>
+        ) : (
+          <motion.div key="idle" className="reply-actions" {...swap}>
+            <span className="pill pill-warn">
+              <span className="pill-dot pulse" />
+              Needs reply
+            </span>
+            <motion.button
+              type="button"
+              className="btn btn-small btn-accent"
+              onClick={generate}
+              disabled={state.status === 'loading'}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              {state.status === 'loading' ? (
+                <>
+                  <motion.span
+                    className="spinner spinner-small"
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
+                  />
+                  Writing…
+                </>
+              ) : (
+                '✨ Suggest reply'
+              )}
+            </motion.button>
+            {state.status === 'error' && <p className="error-text small">{state.error}</p>}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

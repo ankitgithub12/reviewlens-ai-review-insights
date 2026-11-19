@@ -1,6 +1,9 @@
+import { motion } from 'framer-motion';
+import { easeOut, fadeUp, Reveal, stagger } from './motion.jsx';
+
 const SOURCE_NOTE = {
-  ai: 'Grouped by AI from the analysed reviews',
-  cache: 'Grouped by AI (cached)',
+  ai: '✨ Grouped by AI from the analysed reviews',
+  cache: '✨ Grouped by AI (cached)',
   fallback: 'AI grouping unavailable — ranked by topic counts',
   none: 'No analysed reviews yet',
 };
@@ -8,32 +11,50 @@ const SOURCE_NOTE = {
 export default function ThemesPanel({ themes, reviews }) {
   const summaryById = new Map(reviews.filter((r) => r.analysis).map((r) => [r.review_id, r.analysis.summary]));
   return (
-    <section className="themes">
-      <ThemeList title="Top complaints" items={themes.complaints} tone="negative" summaryById={summaryById} />
-      <ThemeList title="Top praises" items={themes.praises} tone="positive" summaryById={summaryById} />
+    <Reveal className="themes">
+      <ThemeList title="Top complaints" icon="⚠️" items={themes.complaints} tone="negative" summaryById={summaryById} />
+      <ThemeList title="Top praises" icon="💚" items={themes.praises} tone="positive" summaryById={summaryById} />
       <p className="muted small themes-note">{SOURCE_NOTE[themes.source]}</p>
-    </section>
+    </Reveal>
   );
 }
 
-function ThemeList({ title, items, tone, summaryById }) {
+function ThemeList({ title, icon, items, tone, summaryById }) {
+  const max = Math.max(1, ...items.map((item) => item.count));
   return (
-    <div className={`card theme-card theme-${tone}`}>
-      <h2>{title}</h2>
+    <motion.div className={`card theme-card theme-${tone}`} whileHover={{ y: -3 }}>
+      <h2>
+        <span className="theme-icon">{icon}</span> {title}
+      </h2>
       {items.length === 0 && <p className="muted">None found.</p>}
-      <ol>
-        {items.map((item) => (
-          <li key={item.theme}>
-            <div className="theme-title">
-              {item.theme}
-              <span className="pill">{item.count} review{item.count === 1 ? '' : 's'}</span>
+      <motion.ol initial="hidden" whileInView="show" viewport={{ once: true }} variants={stagger(0.12, 0.15)}>
+        {items.map((item, index) => (
+          <motion.li key={item.theme} variants={fadeUp}>
+            <span className="rank">{index + 1}</span>
+            <div className="theme-body">
+              <div className="theme-title">
+                {item.theme}
+                <span className="count-chip">{item.count}</span>
+              </div>
+              <div className="theme-track">
+                <motion.div
+                  className="theme-fill"
+                  initial={{ width: 0 }}
+                  whileInView={{ width: `${(item.count / max) * 100}%` }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.9, delay: 0.3 + index * 0.12, ease: easeOut }}
+                />
+              </div>
+              <div
+                className="muted small"
+                title={item.review_ids.map((id) => `${id}: ${summaryById.get(id) ?? ''}`).join('\n')}
+              >
+                {item.review_ids.join(', ')}
+              </div>
             </div>
-            <div className="muted small" title={item.review_ids.map((id) => `${id}: ${summaryById.get(id) ?? ''}`).join('\n')}>
-              {item.review_ids.join(', ')}
-            </div>
-          </li>
+          </motion.li>
         ))}
-      </ol>
-    </div>
+      </motion.ol>
+    </motion.div>
   );
 }
