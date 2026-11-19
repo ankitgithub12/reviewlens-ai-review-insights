@@ -1,5 +1,9 @@
-async function request(url, options) {
-  const response = await fetch(url, options);
+// Empty by default: the API is on the same origin (Vite proxy in dev, nginx or Express in production).
+// Set VITE_API_URL at build time when the frontend is hosted separately from the backend.
+const API_BASE = (import.meta.env.VITE_API_URL ?? '').replace(/\/+$/, '');
+
+async function request(path, options) {
+  const response = await fetch(`${API_BASE}${path}`, options);
   const body = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(body.error || `Request failed (${response.status})`);
   return body;

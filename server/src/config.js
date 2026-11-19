@@ -26,5 +26,10 @@ export const config = {
   batchSize: intFromEnv('BATCH_SIZE', 5),
   cacheFile: process.env.CACHE_FILE?.trim() || path.join(serverRoot, 'data', 'cache.json'),
   clientDist: path.join(repoRoot, 'client', 'dist'),
+  // Comma-separated frontend origins allowed to call the API cross-origin, e.g. https://reviewlens.vercel.app
+  corsOrigins: (process.env.CORS_ORIGIN ?? '')
+    .split(',')
+    .map((origin) => origin.trim().replace(/\/+$/, ''))
+    .filter(Boolean),
   maxUploadBytes: 2 * 1024 * 1024,
 };

@@ -6,10 +6,31 @@ import { CsvFormatError } from './csv/cleanReviews.js';
 import { LlmHttpError } from './llm/retry.js';
 import { createApiRouter, HttpError } from './routes/api.js';
 
-export function createApp({ llm, cache, batchSize, maxUploadBytes, clientDist }) {
+/**
+ * Allows browsers on the listed origins (e.g. a separately hosted frontend) to call the API.
+ * With no origins configured, nothing is added and only same-origin requests work.
+ */
+function corsMiddleware(allowedOrigins) {
+  return (req, res, next) => {
+    const origin = req.headers.origin;
+    if (origin && allowedOrigins.includes(origin)) {
+      res.set('Access-Control-Allow-Origin', origin);
+      res.set('Vary', 'Origin');
+      if (req.method === 'OPTIONS') {
+        res.set('Access-Control-Allow-Methods', 'GET, POST');
+        res.set('Access-Control-Allow-Headers', 'Content-Type');
+        return res.sendStatus(204);
+      }
+    }
+    return next();
+  };
+}
+
+export function createApp({ llm, cache, batchSize, maxUploadBytes, clientDist, corsOrigins = [] }) {
   const app = express();
   app.disable('x-powered-by');
 
+  if (corsOrigins.length > 0) app.use('/api', corsMiddleware(corsOrigins));
   app.use('/api', createApiRouter({ llm, cache, batchSize, maxUploadBytes }));
 
   // In production the built React app is served from the same origin as the API.

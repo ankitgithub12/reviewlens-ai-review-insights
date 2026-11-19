@@ -14,6 +14,7 @@ const app = createApp({
   batchSize: config.batchSize,
   maxUploadBytes: config.maxUploadBytes,
   clientDist: config.clientDist,
+  corsOrigins: config.corsOrigins,
 });
 
 app.listen(config.port, () => {
