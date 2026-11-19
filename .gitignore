@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.env
+server/data/
+*.log
+.DS_Store
+
+# Assessment brief (not part of the submission)
+*.pdf
