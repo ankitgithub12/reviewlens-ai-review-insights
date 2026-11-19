@@ -18,7 +18,7 @@ export const config = {
   llm: {
     apiKey: process.env.LLM_API_KEY?.trim() || '',
     baseUrl: (process.env.LLM_BASE_URL?.trim() || 'https://api.groq.com/openai/v1').replace(/\/+$/, ''),
-    model: process.env.LLM_MODEL?.trim() || 'llama-3.3-70b-versatile',
+    model: process.env.LLM_MODEL?.trim() || 'openai/gpt-oss-120b',
     maxAttempts: intFromEnv('LLM_MAX_ATTEMPTS', 4),
     baseDelayMs: intFromEnv('LLM_BASE_DELAY_MS', 1000),
     timeoutMs: intFromEnv('LLM_TIMEOUT_MS', 60000),

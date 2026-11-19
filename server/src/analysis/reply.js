@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import { buildReplyMessages, PROMPT_VERSION } from '../llm/prompts.js';
+import { LlmHttpError } from '../llm/retry.js';
 import { parseJsonContent } from '../llm/schema.js';
 
 const MIN_REPLY_LENGTH = 20;
@@ -42,5 +43,5 @@ export async function generateReply({ product, text, analysis }, { llm, cache })
     }
     lastError = result.error;
   }
-  throw new Error(`AI returned an invalid reply twice (${lastError})`);
+  throw new LlmHttpError(502, `the AI returned an invalid reply twice (${lastError}). Please try again.`);
 }

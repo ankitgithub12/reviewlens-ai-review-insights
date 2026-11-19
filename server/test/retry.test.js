@@ -59,6 +59,21 @@ test('does not retry client errors such as a bad API key', async () => {
   assert.equal(waits.length, 0);
 });
 
+test('Groq json_validate_failed is returned as (invalid) content, not thrown or HTTP-retried', async () => {
+  const waits = [];
+  const body = { error: { code: 'json_validate_failed', message: 'Failed to generate JSON', failed_generation: '{"results": [' } };
+  const { fetchImpl, requests } = queuedFetch([{ status: 400, body }]);
+  const content = await clientWith(fetchImpl, waits).chatJson([]);
+  assert.equal(content, '{"results": [');
+  assert.equal(requests.length, 1);
+  assert.equal(waits.length, 0);
+});
+
+test('other 400 errors are still thrown', async () => {
+  const { fetchImpl } = queuedFetch([{ status: 400, body: { error: { code: 'invalid_request_error' } } }]);
+  await assert.rejects(clientWith(fetchImpl, []).chatJson([]), (err) => err.status === 400);
+});
+
 test('gives up after maxAttempts and rethrows the last error', async () => {
   const waits = [];
   const { fetchImpl, requests } = queuedFetch([{ status: 500 }, { status: 500 }, { status: 500 }, { status: 500 }]);

@@ -2,6 +2,16 @@ import { LlmHttpError, withRetry } from './retry.js';
 
 const MAX_RETRY_AFTER_MS = 60000;
 
+/** Returns the model's rejected text for a "json_validate_failed" error, otherwise null. */
+export function parseFailedGeneration(status, body) {
+  if (status !== 400 || !body.includes('json_validate_failed')) return null;
+  try {
+    return String(JSON.parse(body)?.error?.failed_generation ?? '');
+  } catch {
+    return '';
+  }
+}
+
 function parseRetryAfter(headerValue) {
   if (!headerValue) return null;
   const seconds = Number(headerValue);
@@ -39,6 +49,11 @@ export function createLlmClient({
 
     if (!response.ok) {
       const body = await response.text().catch(() => '');
+      // In JSON mode Groq answers 400 "json_validate_failed" when the model's output was not valid
+      // JSON. That is bad *output*, not a bad request: hand the raw text back so the callers'
+      // schema validation rejects it and their retry-once logic applies.
+      const failedGeneration = parseFailedGeneration(response.status, body);
+      if (failedGeneration !== null) return failedGeneration;
       throw new LlmHttpError(
         response.status,
         `LLM API returned ${response.status}: ${body.slice(0, 300)}`,

@@ -3,6 +3,7 @@ import path from 'node:path';
 import express from 'express';
 import multer from 'multer';
 import { CsvFormatError } from './csv/cleanReviews.js';
+import { LlmHttpError } from './llm/retry.js';
 import { createApiRouter, HttpError } from './routes/api.js';
 
 export function createApp({ llm, cache, batchSize, maxUploadBytes, clientDist }) {
@@ -24,6 +25,12 @@ export function createApp({ llm, cache, batchSize, maxUploadBytes, clientDist })
     if (err instanceof HttpError) return res.status(err.status).json({ error: err.message });
     if (err instanceof CsvFormatError) return res.status(400).json({ error: err.message });
     if (err instanceof multer.MulterError) return res.status(400).json({ error: `Upload error: ${err.message}` });
+    // The AI provider failed (bad key, model, rate limit after retries, invalid output twice):
+    // tell the user why instead of a generic 500. 502 = an upstream service failed.
+    if (err instanceof LlmHttpError) {
+      console.error(err.message);
+      return res.status(502).json({ error: `AI provider error: ${err.message}` });
+    }
     console.error(err);
     return res.status(500).json({ error: 'Something went wrong on the server.' });
   });
