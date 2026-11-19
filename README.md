@@ -176,8 +176,27 @@ deterministic topic counts and says so.
 
 ## Screenshots
 
-_Add 2–3 screenshots of the dashboard here after running it with your API key, e.g._
-`docs/screenshots/overview.png`, `docs/screenshots/table.png`, `docs/screenshots/product.png`.
+Captured from the app running against the real Groq API (`openai/gpt-oss-120b`) on the sample
+`reviews.csv`.
+
+**Overview** — dataset bar, summary cards, and the AI-grouped top complaints and praises, each quoting
+a real review.
+
+![Overview dashboard](docs/screenshots/overview.png)
+
+**Reviews table** — sentiment filter chips, topic/product filters, flags such as *Rating mismatch*
+(R008: 5 stars, negative text) and a suggested reply generated on click (R007).
+
+![Reviews table with a suggested reply](docs/screenshots/reviews-table.png)
+
+**Product page** — Wireless Earbuds X2: sentiment split, top issues and its reviews. R012, the
+prompt-injection attempt, is flagged and still classified *Negative*.
+
+![Product page for Wireless Earbuds X2](docs/screenshots/product.png)
+
+**Phone** — on narrow screens the sidebar becomes a menu and the cards stack.
+
+<img src="docs/screenshots/mobile.png" alt="ReviewLens on a phone" width="320" />
 
 ## AI coding tools used
 
