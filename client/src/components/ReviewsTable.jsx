@@ -134,9 +134,9 @@ function ReviewRow({ review, position }) {
       animate={{ opacity: 1, y: 0, transition: { duration: 0.35, delay: Math.min(position * 0.03, 0.5), ease: easeOut } }}
       exit={{ opacity: 0, x: -20, transition: { duration: 0.2 } }}
     >
-      <td className="nowrap id-cell">{review.review_id}</td>
-      <td>{review.product}</td>
-      <td className="nowrap">
+      <td className="nowrap id-cell" data-label="ID">{review.review_id}</td>
+      <td data-label="Product">{review.product}</td>
+      <td className="nowrap" data-label="Rating">
         {review.rating != null ? <span className="stars">{'★'.repeat(review.rating)}<span className="stars-off">{'★'.repeat(5 - review.rating)}</span></span> : <span className="muted">unknown</span>}
         {review.rating_mismatch && (
           <div>
@@ -146,9 +146,9 @@ function ReviewRow({ review, position }) {
           </div>
         )}
       </td>
-      <td>{analysis ? <SentimentBadge sentiment={analysis.sentiment} /> : <span className="muted">—</span>}</td>
-      <td>{analysis?.topics.map((t) => <TopicTag key={t} topic={t} />)}</td>
-      <td className="col-summary">
+      <td data-label="Sentiment">{analysis ? <SentimentBadge sentiment={analysis.sentiment} /> : <span className="muted">—</span>}</td>
+      <td data-label="Topics">{analysis?.topics.map((t) => <TopicTag key={t} topic={t} />)}</td>
+      <td className="col-summary" data-label="Review">
         {statusLabel && (
           <div className="status-line">
             <strong>{statusLabel}</strong>
@@ -165,7 +165,7 @@ function ReviewRow({ review, position }) {
           {review.source === 'cache' && <span className="tag">⚡ cached</span>}
         </div>
       </td>
-      <td>{review.status === 'analyzed' && analysis.needs_reply ? <ReplyCell review={review} /> : null}</td>
+      <td className="col-reply" data-label="Reply">{review.status === 'analyzed' && analysis.needs_reply ? <ReplyCell review={review} /> : null}</td>
     </motion.tr>
   );
 }

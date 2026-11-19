@@ -1046,7 +1046,7 @@ tbody tr:hover {
 }
 
 .col-summary {
-  min-width: 320px;
+  min-width: 280px;
 }
 
 .summary-text {
@@ -1141,9 +1141,172 @@ tbody tr:hover {
 }
 
 /* ---------- Responsive ---------- */
+
+/* Tablets and small laptops */
 @media (max-width: 900px) {
   .themes,
   .product-overview {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Phones: tighter spacing, tabs scroll sideways, two-column cards and filters */
+@media (max-width: 720px) {
+  .app {
+    padding: 1rem 0.85rem 2rem;
+    gap: 0.9rem;
+  }
+
+  .card {
+    padding: 0.95rem;
+  }
+
+  h1 {
+    font-size: 1.55rem;
+  }
+
+  .logo {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+  }
+
+  .upload {
+    flex-direction: column;
+  }
+
+  .dropzone {
+    flex-basis: auto;
+    padding: 0.85rem;
+  }
+
+  .btn-primary {
+    width: 100%;
+  }
+
+  .tabs {
+    width: 100%;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tab {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+
+  .cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.65rem;
+  }
+
+  .stat-value {
+    font-size: 1.6rem;
+  }
+
+  .product-metrics {
+    gap: 1.25rem;
+  }
+
+  .filters {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+  }
+
+  .select select {
+    max-width: none;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .run-stats dl {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Tables wider than the screen: each row becomes a card; each cell shows its column name from data-label */
+@media (max-width: 960px) {
+  .table-wrap {
+    overflow-x: visible;
+  }
+
+  table,
+  tbody,
+  tr,
+  td {
+    display: block;
+    width: 100%;
+  }
+
+  thead {
+    display: none;
+  }
+
+  tbody tr {
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--card-solid);
+    padding: 0.4rem 0.8rem;
+    margin-bottom: 0.7rem;
+  }
+
+  tbody tr:hover {
+    background: var(--card-solid);
+  }
+
+  td {
+    position: relative;
+    border-bottom: 1px dashed var(--border);
+    padding: 0.5rem 0 0.5rem 88px;
+    min-height: 2.2rem;
+  }
+
+  td:last-child {
+    border-bottom: none;
+  }
+
+  td:empty {
+    display: none;
+  }
+
+  td::before {
+    content: attr(data-label);
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+    position: absolute;
+    left: 0;
+    top: 0.68rem;
+  }
+
+  .nowrap {
+    white-space: normal;
+  }
+
+  .col-summary {
+    min-width: 0;
+  }
+
+  .reply {
+    min-width: 0;
+    max-width: none;
+  }
+}
+
+/* Very small phones */
+@media (max-width: 360px) {
+  .cards,
+  .run-stats dl,
+  .filters {
     grid-template-columns: 1fr;
   }
 }
