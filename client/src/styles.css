@@ -1941,13 +1941,17 @@ tbody tr:hover {
   }
 
   .kpi-grid > *,
-  .kpi-grid > :nth-child(4) {
+  .kpi-grid > :nth-child(4),
+  .kpi-grid > :nth-child(5) {
     grid-column: span 1;
   }
 
-  .kpi-grid > :first-child,
-  .kpi-grid > :nth-child(5) {
+  .kpi-grid > :first-child {
     grid-column: span 2;
+  }
+
+  .scope-info {
+    align-items: flex-start;
   }
 
   .kpi-value {
