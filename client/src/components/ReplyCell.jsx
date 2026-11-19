@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import Icon from './Icon.jsx';
 import { suggestReply } from '../api.js';
 
 const swap = {
-  initial: { opacity: 0, y: 8, scale: 0.98 },
-  animate: { opacity: 1, y: 0, scale: 1 },
-  exit: { opacity: 0, y: -8, scale: 0.98 },
-  transition: { duration: 0.25 },
+  initial: { opacity: 0, y: 6 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -6 },
+  transition: { duration: 0.2 },
 };
 
 /** Suggested reply is generated only when the user clicks, never upfront. */
@@ -34,40 +35,28 @@ export default function ReplyCell({ review }) {
     <div className="reply">
       <AnimatePresence mode="wait" initial={false}>
         {state.status === 'done' ? (
-          <motion.div key="done" className="reply-bubble" {...swap}>
+          <motion.div key="done" className="reply-box" {...swap}>
+            <div className="reply-box-head">
+              <span className="dot dot-primary" />
+              <span className="mono-label">Suggested reply</span>
+            </div>
             <p>{state.reply}</p>
-            <motion.button type="button" className="btn btn-small" onClick={copy} whileTap={{ scale: 0.92 }}>
-              {copied ? '✓ Copied' : 'Copy'}
-            </motion.button>
+            <button type="button" className="link-btn" onClick={copy}>
+              <Icon name={copied ? 'check' : 'content_copy'} />
+              {copied ? 'Copied' : 'Copy'}
+            </button>
           </motion.div>
         ) : (
           <motion.div key="idle" className="reply-actions" {...swap}>
-            <span className="pill pill-warn">
-              <span className="pill-dot pulse" />
+            <span className="chip tone-bg-warn">
+              <span className="dot dot-warn pulse" />
               Needs reply
             </span>
-            <motion.button
-              type="button"
-              className="btn btn-small btn-accent"
-              onClick={generate}
-              disabled={state.status === 'loading'}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              {state.status === 'loading' ? (
-                <>
-                  <motion.span
-                    className="spinner spinner-small"
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
-                  />
-                  Writing…
-                </>
-              ) : (
-                '✨ Suggest reply'
-              )}
-            </motion.button>
-            {state.status === 'error' && <p className="error-text small">{state.error}</p>}
+            <button type="button" className="btn btn-secondary btn-small" onClick={generate} disabled={state.status === 'loading'}>
+              {state.status === 'loading' ? <span className="spinner" /> : <Icon name="auto_awesome" className="tone-primary" />}
+              {state.status === 'loading' ? 'Writing…' : 'Suggest reply'}
+            </button>
+            {state.status === 'error' && <p className="error-text">{state.error}</p>}
           </motion.div>
         )}
       </AnimatePresence>

@@ -1,10 +1,12 @@
 import { useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import Icon from './Icon.jsx';
 import { FlagTag, SentimentBadge, TOPIC_LABELS, TopicTag } from './badges.jsx';
 import { easeOut, Reveal } from './motion.jsx';
 import ReplyCell from './ReplyCell.jsx';
 
 const ALL = '';
+const SENTIMENTS = ['positive', 'neutral', 'negative'];
 
 const STATUS_LABELS = {
   analyzed: null,
@@ -34,6 +36,11 @@ export default function ReviewsTable({ reviews, products }) {
     [reviews, product, sentiment, topic, replyOnly],
   );
 
+  const sentimentCounts = useMemo(
+    () => Object.fromEntries(SENTIMENTS.map((s) => [s, reviews.filter((r) => r.analysis?.sentiment === s).length])),
+    [reviews],
+  );
+
   const hasFilters = Boolean(product || sentiment || topic || replyOnly);
   const clearFilters = () => {
     setProduct(ALL);
@@ -42,29 +49,59 @@ export default function ReviewsTable({ reviews, products }) {
     setReplyOnly(false);
   };
 
+  const chips = [
+    [ALL, 'All', reviews.length],
+    ...SENTIMENTS.map((s) => [s, s[0].toUpperCase() + s.slice(1), sentimentCounts[s]]),
+  ];
+
   return (
-    <Reveal className="card table-card">
-      <div className="table-header">
-        <div>
+    <Reveal className="panel table-panel">
+      <div className="panel-head">
+        <div className="panel-title">
+          <span className="dot dot-primary" />
           <h2>Reviews</h2>
-          <p className="muted small">
-            Showing{' '}
-            <motion.strong key={filtered.length} initial={{ scale: 1.4, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}>
+          <span className="chip">
+            <motion.span key={filtered.length} initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }}>
               {filtered.length}
-            </motion.strong>{' '}
-            of {reviews.length} rows
-          </p>
+            </motion.span>
+            &nbsp;of {reviews.length}
+          </span>
+        </div>
+        <AnimatePresence>
+          {hasFilters && (
+            <motion.button
+              type="button"
+              className="link-btn"
+              onClick={clearFilters}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <Icon name="filter_alt_off" />
+              Clear filters
+            </motion.button>
+          )}
+        </AnimatePresence>
+      </div>
+
+      <div className="filter-rail">
+        <div className="chip-filters" role="group" aria-label="Filter by sentiment">
+          {chips.map(([value, label, count]) => (
+            <button
+              key={label}
+              type="button"
+              className={`filter-chip ${sentiment === value ? 'active' : ''}`}
+              onClick={() => setSentiment(value)}
+              aria-pressed={sentiment === value}
+            >
+              {label} <span className="filter-count">({count})</span>
+            </button>
+          ))}
         </div>
         <div className="filters">
           {products.length > 1 && (
             <Select label="Product" value={product} onChange={setProduct} options={products.map((p) => [p, p])} />
           )}
-          <Select
-            label="Sentiment"
-            value={sentiment}
-            onChange={setSentiment}
-            options={['positive', 'neutral', 'negative'].map((s) => [s, s])}
-          />
           <Select label="Topic" value={topic} onChange={setTopic} options={Object.entries(TOPIC_LABELS)} />
           <label className={`toggle ${replyOnly ? 'on' : ''}`}>
             <input type="checkbox" checked={replyOnly} onChange={(e) => setReplyOnly(e.target.checked)} />
@@ -73,20 +110,6 @@ export default function ReviewsTable({ reviews, products }) {
             </span>
             Needs reply
           </label>
-          <AnimatePresence>
-            {hasFilters && (
-              <motion.button
-                type="button"
-                className="btn btn-ghost"
-                onClick={clearFilters}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.8 }}
-              >
-                ✕ Clear
-              </motion.button>
-            )}
-          </AnimatePresence>
         </div>
       </div>
 
@@ -114,7 +137,7 @@ export default function ReviewsTable({ reviews, products }) {
         <AnimatePresence>
           {filtered.length === 0 && (
             <motion.p className="muted empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-              🔍 No reviews match these filters.
+              No reviews match these filters.
             </motion.p>
           )}
         </AnimatePresence>
@@ -130,42 +153,61 @@ function ReviewRow({ review, position }) {
     <motion.tr
       layout
       className={review.status !== 'analyzed' ? 'row-dim' : ''}
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0, transition: { duration: 0.35, delay: Math.min(position * 0.03, 0.5), ease: easeOut } }}
-      exit={{ opacity: 0, x: -20, transition: { duration: 0.2 } }}
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0, transition: { duration: 0.3, delay: Math.min(position * 0.025, 0.4), ease: easeOut } }}
+      exit={{ opacity: 0, transition: { duration: 0.15 } }}
     >
-      <td className="nowrap id-cell" data-label="ID">{review.review_id}</td>
+      <td className="nowrap id-cell" data-label="ID">
+        {review.review_id}
+      </td>
       <td data-label="Product">{review.product}</td>
       <td className="nowrap" data-label="Rating">
-        {review.rating != null ? <span className="stars">{'★'.repeat(review.rating)}<span className="stars-off">{'★'.repeat(5 - review.rating)}</span></span> : <span className="muted">unknown</span>}
+        {review.rating != null ? (
+          <span className="stars" aria-label={`${review.rating} out of 5 stars`}>
+            {'★'.repeat(review.rating)}
+            <span className="stars-off">{'★'.repeat(5 - review.rating)}</span>
+          </span>
+        ) : (
+          <span className="muted">unknown</span>
+        )}
         {review.rating_mismatch && (
           <div>
-            <span className="tag tag-warn" title="Star rating disagrees with the review text">
+            <span className="chip tone-bg-negative" title="Star rating disagrees with the review text">
               Rating mismatch
             </span>
           </div>
         )}
       </td>
       <td data-label="Sentiment">{analysis ? <SentimentBadge sentiment={analysis.sentiment} /> : <span className="muted">—</span>}</td>
-      <td data-label="Topics">{analysis?.topics.map((t) => <TopicTag key={t} topic={t} />)}</td>
+      <td data-label="Topics">
+        <span className="chip-row">
+          {analysis?.topics.map((t) => (
+            <TopicTag key={t} topic={t} />
+          ))}
+        </span>
+      </td>
       <td className="col-summary" data-label="Review">
         {statusLabel && (
           <div className="status-line">
             <strong>{statusLabel}</strong>
             {review.duplicate_of && ` of ${review.duplicate_of}`}
-            {review.error && <span className="muted small"> — {review.error}</span>}
+            {review.error && <span className="muted"> — {review.error}</span>}
           </div>
         )}
         {analysis && <div className="summary-text">{analysis.summary}</div>}
         {review.text && <div className="original">“{review.text}”</div>}
-        <div>
-          {review.flags.map((flag) => (
-            <FlagTag key={flag} flag={flag} />
-          ))}
-          {review.source === 'cache' && <span className="tag">⚡ cached</span>}
-        </div>
+        {(review.flags.length > 0 || review.source === 'cache') && (
+          <div className="chip-row">
+            {review.flags.map((flag) => (
+              <FlagTag key={flag} flag={flag} />
+            ))}
+            {review.source === 'cache' && <span className="chip">cached</span>}
+          </div>
+        )}
       </td>
-      <td className="col-reply" data-label="Reply">{review.status === 'analyzed' && analysis.needs_reply ? <ReplyCell review={review} /> : null}</td>
+      <td className="col-reply" data-label="Reply">
+        {review.status === 'analyzed' && analysis.needs_reply ? <ReplyCell review={review} /> : null}
+      </td>
     </motion.tr>
   );
 }

@@ -1,15 +1,18 @@
 import { useEffect, useState } from 'react';
-import { AnimatePresence, LayoutGroup, motion, MotionConfig } from 'framer-motion';
+import { AnimatePresence, motion, MotionConfig } from 'framer-motion';
 import { analyzeCsv, getHealth } from './api.js';
-import UploadPanel from './components/UploadPanel.jsx';
+import Sidebar from './components/Sidebar.jsx';
+import TopBar from './components/TopBar.jsx';
+import ScopeBar from './components/ScopeBar.jsx';
 import SummaryCards from './components/SummaryCards.jsx';
 import ThemesPanel from './components/ThemesPanel.jsx';
 import ProductView from './components/ProductView.jsx';
 import ReviewsTable from './components/ReviewsTable.jsx';
 import RunStats from './components/RunStats.jsx';
+import Icon from './components/Icon.jsx';
 import { easeOut, fadeUp, stagger } from './components/motion.jsx';
 
-const OVERVIEW = '__overview__';
+import { OVERVIEW } from './constants.js';
 
 export default function App() {
   const [health, setHealth] = useState(null);
@@ -17,6 +20,7 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [view, setView] = useState(OVERVIEW);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     getHealth()
@@ -37,141 +41,114 @@ export default function App() {
     }
   }
 
+  function selectView(nextView) {
+    setView(nextView);
+    setMenuOpen(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
   const product = report?.products.find((p) => p.product === view);
 
   return (
     // reducedMotion="user": people who turned off animations in their OS get a static UI.
     <MotionConfig reducedMotion="user">
-      <div className="backdrop" aria-hidden="true">
-        <div className="blob blob-1" />
-        <div className="blob blob-2" />
-        <div className="blob blob-3" />
-      </div>
+      <div className="shell">
+        <Sidebar
+          report={report}
+          view={view}
+          onSelect={selectView}
+          health={health}
+          open={menuOpen}
+          onClose={() => setMenuOpen(false)}
+        />
 
-      <motion.div className="app" initial="hidden" animate="show" variants={stagger(0.1)}>
-        <motion.header className="app-header" variants={fadeUp}>
-          <div className="brand">
-            <motion.div
-              className="logo"
-              initial={{ rotate: -20, scale: 0.6, opacity: 0 }}
-              animate={{ rotate: 0, scale: 1, opacity: 1 }}
-              transition={{ type: 'spring', stiffness: 260, damping: 16, delay: 0.1 }}
-            >
-              <LensIcon />
-            </motion.div>
-            <div>
-              <h1>
-                Review<span className="gradient-text">Lens</span>
-              </h1>
-              <p className="muted">What customers love, what they complain about, and who needs a reply.</p>
-            </div>
-          </div>
-          <ServerStatus health={health} />
-        </motion.header>
+        <div className="shell-main">
+          <TopBar viewLabel={product ? product.product : 'Overview'} health={health} onMenu={() => setMenuOpen(true)} />
 
-        <motion.div variants={fadeUp}>
-          <UploadPanel onUpload={handleUpload} loading={loading} disabled={health?.llm_configured === false} />
-        </motion.div>
+          <main className="content">
+            <ScopeBar
+              onUpload={handleUpload}
+              loading={loading}
+              disabled={health?.llm_configured === false}
+              report={report}
+            />
 
-        <AnimatePresence>
-          {error && (
-            <motion.div
-              className="banner banner-error"
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-            >
-              {error}
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        <AnimatePresence mode="wait">
-          {loading && <LoadingState key="loading" />}
-
-          {!loading && report && (
-            <motion.div
-              key="report"
-              className="report"
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -12 }}
-              transition={{ duration: 0.5, ease: easeOut }}
-            >
-              {report.stats.errors.length > 0 && (
-                <div className="banner banner-warn">
-                  <strong>Some AI requests failed.</strong> Affected reviews are marked "analysis failed"; upload
-                  again to retry them (successful results are cached).
-                  <ul>
-                    {report.stats.errors.map((message) => (
-                      <li key={message}>{message}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              <ViewTabs products={report.products} view={view} onChange={setView} />
-
-              <AnimatePresence mode="wait">
+            <AnimatePresence>
+              {error && (
                 <motion.div
-                  key={view}
-                  className="view"
-                  initial={{ opacity: 0, x: 16 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -16 }}
-                  transition={{ duration: 0.3, ease: easeOut }}
+                  className="banner banner-error"
+                  role="alert"
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
                 >
-                  {product ? (
-                    <ProductView product={product} reviews={report.reviews} />
-                  ) : (
-                    <>
-                      <SummaryCards summary={report.summary} agreement={report.rating_agreement} />
-                      <ThemesPanel themes={report.themes} reviews={report.reviews} />
-                      <ReviewsTable reviews={report.reviews} products={report.products.map((p) => p.product)} />
-                    </>
-                  )}
+                  <span className="banner-icon">
+                    <Icon name="error" />
+                  </span>
+                  <div>
+                    <span className="banner-title">Upload failed</span>
+                    <p>{error}</p>
+                  </div>
                 </motion.div>
-              </AnimatePresence>
+              )}
+            </AnimatePresence>
 
-              <RunStats stats={report.stats} summary={report.summary} />
-            </motion.div>
-          )}
+            {/* No exit animations here on purpose: the next state renders immediately instead of
+                waiting for the previous one to animate out (which stalls in background tabs). */}
+            {loading && <LoadingState />}
 
-          {!loading && !report && <EmptyState key="empty" />}
-        </AnimatePresence>
-      </motion.div>
+            {!loading && report && (
+              <motion.div
+                key={`report-${view}`}
+                className="report"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, ease: easeOut }}
+              >
+                {report.stats.errors.length > 0 && <AiErrorBanner errors={report.stats.errors} />}
+
+                {product ? (
+                  <ProductView product={product} reviews={report.reviews} />
+                ) : (
+                  <>
+                    <SummaryCards summary={report.summary} agreement={report.rating_agreement} themes={report.themes} />
+                    <ThemesPanel themes={report.themes} reviews={report.reviews} analyzedCount={report.summary.analyzed} />
+                    <ReviewsTable reviews={report.reviews} products={report.products.map((p) => p.product)} />
+                  </>
+                )}
+
+                <RunStats stats={report.stats} summary={report.summary} />
+              </motion.div>
+            )}
+
+            {!loading && !report && <EmptyState />}
+          </main>
+        </div>
+      </div>
     </MotionConfig>
   );
 }
 
-function ViewTabs({ products, view, onChange }) {
-  const tabs = [{ id: OVERVIEW, label: 'All products' }, ...products.map((p) => ({ id: p.product, label: p.product }))];
+function AiErrorBanner({ errors }) {
   return (
-    <LayoutGroup>
-      <nav className="tabs" aria-label="Views">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            className={view === tab.id ? 'tab active' : 'tab'}
-            onClick={() => onChange(tab.id)}
-            aria-pressed={view === tab.id}
-          >
-            {view === tab.id && (
-              <motion.span
-                layoutId="tab-indicator"
-                className="tab-indicator"
-                transition={{ type: 'spring', stiffness: 420, damping: 34 }}
-              />
-            )}
-            <span className="tab-label">{tab.label}</span>
-          </button>
-        ))}
-      </nav>
-    </LayoutGroup>
+    <div className="banner banner-warn" role="status">
+      <span className="banner-icon">
+        <Icon name="speed" />
+      </span>
+      <div>
+        <span className="banner-title">Some AI requests failed</span>
+        <p>Affected reviews are marked "analysis failed". Upload again to retry them — successful results are cached.</p>
+        <ul>
+          {errors.map((message) => (
+            <li key={message}>{message}</li>
+          ))}
+        </ul>
+      </div>
+    </div>
   );
 }
 
-const LOADING_STEPS = ['Cleaning the CSV', 'Checking the cache', 'Asking the AI in batches', 'Validating every answer'];
+const LOADING_STEPS = ['Cleaning the CSV', 'Checking the cache', 'Asking the AI in batches of 5', 'Validating every answer'];
 
 function LoadingState() {
   const [step, setStep] = useState(0);
@@ -182,82 +159,53 @@ function LoadingState() {
 
   return (
     <motion.div
-      className="card loading-card"
-      initial={{ opacity: 0, scale: 0.97 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.97 }}
+      className="panel loading-panel"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
     >
-      <div className="orbit">
-        {[0, 1, 2].map((i) => (
+      <div className="loading-head">
+        <span className="spinner" />
+        <AnimatePresence mode="wait">
           <motion.span
-            key={i}
-            className="orbit-dot"
-            animate={{ y: [0, -12, 0], opacity: [0.4, 1, 0.4] }}
-            transition={{ duration: 0.9, repeat: Infinity, delay: i * 0.15, ease: 'easeInOut' }}
-          />
-        ))}
+            key={step}
+            className="loading-text"
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.2 }}
+          >
+            {LOADING_STEPS[step]}…
+          </motion.span>
+        </AnimatePresence>
       </div>
-      <AnimatePresence mode="wait">
-        <motion.p
-          key={step}
-          className="loading-text"
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -8 }}
-          transition={{ duration: 0.25 }}
-        >
-          {LOADING_STEPS[step]}…
-        </motion.p>
-      </AnimatePresence>
-      <div className="shimmer-grid">
-        {Array.from({ length: 6 }, (_, i) => (
-          <div key={i} className="shimmer" />
+      <div className="kpi-grid">
+        {Array.from({ length: 5 }, (_, i) => (
+          <div key={i} className="skeleton" />
         ))}
       </div>
     </motion.div>
   );
 }
 
+const FEATURES = [
+  ['cleaning_services', 'Cleans messy data', 'Empty rows, invalid ratings, duplicates and HTML are flagged instead of crashing the run.'],
+  ['verified_user', 'AI you can trust', 'Every AI answer is schema-validated, retried once, and cached by review text.'],
+  ['shield', 'Injection resistant', 'Review text is sent as data, never as instructions — R012 cannot flip its own label.'],
+  ['forum', 'Replies on demand', 'Generate a polite, specific reply for any review that needs one, only when you click.'],
+];
+
 function EmptyState() {
-  const features = [
-    ['🧹', 'Cleans messy data', 'Empty rows, bad ratings, duplicates and HTML are handled for you.'],
-    ['🧠', 'AI you can trust', 'Every AI answer is validated, retried once, and cached.'],
-    ['💬', 'Replies on demand', 'Generate a polite reply for any review that needs one.'],
-  ];
   return (
-    <motion.div className="features" initial="hidden" animate="show" exit={{ opacity: 0 }} variants={stagger(0.1, 0.2)}>
-      {features.map(([icon, title, text]) => (
-        <motion.div key={title} className="card feature" variants={fadeUp} whileHover={{ y: -4 }}>
-          <span className="feature-icon">{icon}</span>
+    <motion.div className="feature-grid" initial="hidden" animate="show" variants={stagger(0.07, 0.1)}>
+      {FEATURES.map(([icon, title, text]) => (
+        <motion.div key={title} className="panel feature" variants={fadeUp}>
+          <span className="icon-box">
+            <Icon name={icon} />
+          </span>
           <h3>{title}</h3>
-          <p className="muted small">{text}</p>
+          <p>{text}</p>
         </motion.div>
       ))}
     </motion.div>
-  );
-}
-
-function ServerStatus({ health }) {
-  let tone = 'neutral';
-  let label = 'Checking server…';
-  if (health && !health.ok) [tone, label] = ['negative', 'Server unreachable'];
-  else if (health && !health.llm_configured) [tone, label] = ['negative', 'LLM_API_KEY missing on server'];
-  else if (health) [tone, label] = ['positive', `AI ready · ${health.model}`];
-
-  return (
-    <motion.span className={`status status-${tone}`} layout>
-      <span className="status-dot" />
-      {label}
-    </motion.span>
-  );
-}
-
-function LensIcon() {
-  return (
-    <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
-      <circle cx="10.5" cy="10.5" r="6.5" />
-      <path d="M15.5 15.5 21 21" />
-      <path d="M8 10.5h5M10.5 8v5" />
-    </svg>
   );
 }

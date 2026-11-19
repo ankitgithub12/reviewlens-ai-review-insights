@@ -1,45 +1,118 @@
 import { motion } from 'framer-motion';
-import { CountUp, fadeUp, stagger } from './motion.jsx';
+import Icon from './Icon.jsx';
+import { SegmentedBar } from './badges.jsx';
+import { CountUp, easeOut, fadeUp, stagger } from './motion.jsx';
 
-export default function SummaryCards({ summary, agreement }) {
+const share = (part, whole) => (whole === 0 ? 0 : Math.round((part / whole) * 1000) / 10);
+
+export default function SummaryCards({ summary, agreement, themes }) {
   const { sentiment } = summary;
-  const mismatches = agreement.mismatched_ids.length;
-  const cards = [
-    { label: 'Reviews analysed', icon: '📊', value: summary.analyzed, note: `of ${summary.total_rows} rows`, tone: 'primary' },
-    { label: 'Positive', icon: '😊', value: sentiment.positive.pct, decimals: 1, suffix: '%', note: `${sentiment.positive.count} reviews`, tone: 'positive' },
-    { label: 'Neutral', icon: '😐', value: sentiment.neutral.pct, decimals: 1, suffix: '%', note: `${sentiment.neutral.count} reviews`, tone: 'neutral' },
-    { label: 'Negative', icon: '😞', value: sentiment.negative.pct, decimals: 1, suffix: '%', note: `${sentiment.negative.count} reviews`, tone: 'negative' },
-    { label: 'Need a reply', icon: '💬', value: summary.needs_reply, note: 'complaints & open issues', tone: 'warn' },
-    {
-      label: 'Rating ↔ text agreement',
-      icon: '⭐',
-      value: agreement.agreement_pct,
-      decimals: 1,
-      suffix: '%',
-      note: `${mismatches} strong mismatch${mismatches === 1 ? '' : 'es'} (${agreement.compared} rated)`,
-      tone: 'primary',
-    },
-  ];
+  const topComplaint = themes.complaints[0]?.theme;
+  const topPraise = themes.praises[0]?.theme;
 
   return (
-    <motion.section className="cards" initial="hidden" animate="show" variants={stagger(0.06)}>
-      {cards.map((card) => (
-        <motion.div
-          key={card.label}
-          className={`card stat stat-${card.tone}`}
-          variants={fadeUp}
-          whileHover={{ y: -5, transition: { type: 'spring', stiffness: 300, damping: 18 } }}
-        >
-          <div className="stat-top">
-            <span className="stat-label">{card.label}</span>
-            <span className="stat-icon">{card.icon}</span>
+    <motion.section className="kpi-grid" initial="hidden" animate="show" variants={stagger(0.06)}>
+      <Kpi label="Reviews analysed" icon="inbox">
+        <div className="kpi-value-row">
+          <span className="kpi-value">
+            <CountUp value={summary.analyzed} />
+          </span>
+          <span className="delta delta-neutral">of {summary.total_rows} rows</span>
+        </div>
+        <p className="kpi-desc">
+          {summary.skipped_empty} empty and {summary.duplicates} duplicate skipped
+        </p>
+        <div className="kpi-foot">
+          <SegmentedBar sentiment={sentiment} />
+          <div className="legend">
+            <span className="legend-positive">Pos {Math.round(sentiment.positive.pct)}%</span>
+            <span className="legend-neutral">Neu {Math.round(sentiment.neutral.pct)}%</span>
+            <span className="legend-negative">Neg {Math.round(sentiment.negative.pct)}%</span>
           </div>
-          <div className="stat-value">
-            <CountUp value={card.value} decimals={card.decimals} suffix={card.suffix} />
+        </div>
+      </Kpi>
+
+      <Kpi label="Positive share" icon="sentiment_satisfied" iconTone="positive">
+        <div className="kpi-value-row">
+          <span className="kpi-value tone-positive">
+            <CountUp value={sentiment.positive.pct} decimals={1} suffix="%" />
+          </span>
+          <span className="kpi-count">({sentiment.positive.count})</span>
+        </div>
+        <p className="kpi-desc">{topPraise ? `Top praise: ${topPraise}` : 'No praise themes yet'}</p>
+        <FootRow label="Neutral share" value={`${sentiment.neutral.pct}%`} />
+      </Kpi>
+
+      <Kpi label="Negative share" icon="sentiment_dissatisfied" iconTone="negative">
+        <div className="kpi-value-row">
+          <span className="kpi-value tone-negative">
+            <CountUp value={sentiment.negative.pct} decimals={1} suffix="%" />
+          </span>
+          <span className="kpi-count">({sentiment.negative.count})</span>
+        </div>
+        <p className="kpi-desc">{topComplaint ? `Top complaint: ${topComplaint}` : 'No complaint themes'}</p>
+        <FootRow label="Failed analyses" value={summary.failed} tone={summary.failed > 0 ? 'negative' : 'positive'} />
+      </Kpi>
+
+      <Kpi label="Needs a reply" icon="notification_important" iconTone="warn">
+        <div className="kpi-value-row">
+          <span className="kpi-value">
+            <CountUp value={summary.needs_reply} />
+          </span>
+          <span className="delta delta-warn">{share(summary.needs_reply, summary.analyzed)}% of reviews</span>
+        </div>
+        <p className="kpi-desc">Complaints and unresolved issues</p>
+        <FootRow label="Replies" value="Generated on click" />
+      </Kpi>
+
+      <Kpi label="Rating ↔ text agreement" icon="analytics" iconTone="primary">
+        <div className="kpi-value-row">
+          <span className="kpi-value tone-primary">
+            <CountUp value={agreement.agreement_pct} decimals={1} />
+          </span>
+          <span className="kpi-count">/ 100%</span>
+        </div>
+        <p className="kpi-desc">
+          {agreement.mismatched_ids.length} strong mismatch{agreement.mismatched_ids.length === 1 ? '' : 'es'} of{' '}
+          {agreement.compared} rated
+        </p>
+        <div className="kpi-foot">
+          <div className="gauge">
+            <motion.div
+              className="gauge-fill"
+              initial={{ width: 0 }}
+              animate={{ width: `${agreement.agreement_pct}%` }}
+              transition={{ duration: 0.9, delay: 0.2, ease: easeOut }}
+            />
           </div>
-          <div className="muted small">{card.note}</div>
-        </motion.div>
-      ))}
+          <div className="legend legend-plain">
+            <span>0</span>
+            <span>{agreement.mismatched_ids.slice(0, 3).join(', ') || 'no mismatches'}</span>
+            <span>100</span>
+          </div>
+        </div>
+      </Kpi>
     </motion.section>
+  );
+}
+
+function Kpi({ label, icon, iconTone = 'muted', children }) {
+  return (
+    <motion.div className="panel kpi" variants={fadeUp}>
+      <div className="kpi-head">
+        <span className="mono-label">{label}</span>
+        <Icon name={icon} className={`tone-${iconTone}`} />
+      </div>
+      {children}
+    </motion.div>
+  );
+}
+
+function FootRow({ label, value, tone }) {
+  return (
+    <div className="kpi-foot kpi-foot-row">
+      <span>{label}</span>
+      <strong className={tone ? `tone-${tone}` : ''}>{value}</strong>
+    </div>
   );
 }
