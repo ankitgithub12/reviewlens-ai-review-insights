@@ -35,6 +35,38 @@ npm run build && npm start   # production: one server on http://localhost:3001
 
 Open the URL, choose `reviews.csv` (in the repo root) and click **Analyse reviews**.
 
+### Run with Docker
+
+With Docker Desktop running and `.env` created as above:
+
+```bash
+docker compose up --build    # then open http://localhost:8080
+```
+
+This starts two containers:
+
+- **`server`** — the Express API on port 3001, reachable only inside the compose network. The
+  analysis cache is kept in the `cache-data` volume, so re-uploading a file after a restart makes no
+  AI calls.
+- **`client`** — nginx serving the built React app on http://localhost:8080. It proxies `/api` to
+  `server`, so the browser never talks to the LLM provider and never sees the key.
+
+Stop with `docker compose down`; add `-v` to also delete the cache volume.
+
+### Deploying the frontend and backend separately
+
+The two halves can also be hosted on different services, for example the backend on Render or
+Railway and the frontend on Vercel or Netlify.
+
+| Part | Root / build | Start / output | Environment variables |
+| --- | --- | --- | --- |
+| Backend | `server/Dockerfile` (build context = repo root), or `npm ci` then `npm start -w server` | `node src/index.js`, port from `PORT` | `LLM_API_KEY`, `LLM_BASE_URL`, `LLM_MODEL`, and `CORS_ORIGIN` = the frontend's URL |
+| Frontend | `npm ci && npm run build -w client` | static files in `client/dist` | `VITE_API_URL` = the backend's public URL (read at build time) |
+
+Without `VITE_API_URL` the frontend calls `/api` on its own origin; without `CORS_ORIGIN` the API
+only accepts same-origin requests. The JSON cache file lives on the backend's disk, so on hosts with
+an ephemeral filesystem it resets on each deploy.
+
 Run the tests (no API key needed — they use a fake LLM):
 
 ```bash
@@ -69,6 +101,8 @@ ReplyCell ──POST /api/reply──────▶ analysis/reply      on-clic
 | `server/src/analysis/analyzer.js` | Cache → batches → validate → retry-once → `analysis_failed` |
 | `server/src/analysis/report.js` | Summary cards, rating mismatch/agreement, per-product breakdown, fallback themes |
 | `server/src/cache/jsonCache.js` | JSON-file cache with atomic writes |
+| `server/src/app.js` | Express app: API routes, optional CORS for a separately hosted frontend, JSON error handling |
+| `docker-compose.yml`, `*/Dockerfile`, `client/nginx.conf` | Container setup: API container + nginx serving the React build and proxying `/api` |
 | `client/src/` | React dashboard (no UI library): sidebar + top bar shell, scope bar (upload), KPI cards, complaint/praise panels, filterable table, per-product pages; Framer Motion for animation |
 
 ### How the requirements are met
@@ -98,8 +132,8 @@ ReplyCell ──POST /api/reply──────▶ analysis/reply      on-clic
    is committed). The browser only talks to `/api/*`; it never sees the key or the LLM URL.
 
 **Bonus features:** rating-mismatch flag + agreement % (e.g. R008: 5★ but negative), a view per
-product (sentiment split, average rating, top issues, its reviews), and a run log (AI calls, cache
-hits, retries, processing time).
+product (sentiment split, average rating, top issues, its reviews), a run log (AI calls, cache
+hits, retries, processing time), and Docker (`docker compose up` runs the whole app).
 
 ## The prompt, and why it is designed this way
 

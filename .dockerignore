@@ -1,0 +1,11 @@
+# Keep the build context small and keep secrets out of images.
+**/node_modules
+client/dist
+server/data
+.env
+.env.*
+!.env.example
+.git
+docs
+*.pdf
+*.log

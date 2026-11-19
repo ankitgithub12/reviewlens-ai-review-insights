@@ -1,0 +1,28 @@
+# Runs the whole app: `docker compose up --build`, then open http://localhost:8080
+# Needs a .env file in the repository root with LLM_API_KEY (copy .env.example).
+services:
+  server:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    env_file: .env
+    environment:
+      PORT: "3001"
+    volumes:
+      - cache-data:/app/server/data
+    restart: unless-stopped
+
+  client:
+    build:
+      context: .
+      dockerfile: client/Dockerfile
+    ports:
+      - "8080:80"
+    depends_on:
+      server:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  # Keeps analysed reviews cached across restarts, so re-uploading a file makes no AI calls.
+  cache-data:
