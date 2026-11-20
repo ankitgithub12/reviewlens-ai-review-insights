@@ -13,7 +13,7 @@ export function looksLikePromptInjection(text) {
 }
 
 /** What the star rating alone would suggest. */
-export function sentimentFromRating(rating) {
+function sentimentFromRating(rating) {
   if (rating == null) return null;
   if (rating >= 4) return 'positive';
   if (rating === 3) return 'neutral';

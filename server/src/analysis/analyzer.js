@@ -3,7 +3,7 @@ import { buildAnalysisMessages, PROMPT_VERSION } from '../llm/prompts.js';
 import { validateBatchResponse } from '../llm/schema.js';
 
 /** Longer reviews are cut before sending; enough context to classify, bounded token cost. */
-export const MAX_REVIEW_CHARS = 2000;
+const MAX_REVIEW_CHARS = 2000;
 
 /** Errors where retrying later batches is pointless (bad key, wrong model/URL). */
 const isFatal = (err) => err instanceof LlmHttpError && [401, 403, 404].includes(err.status);

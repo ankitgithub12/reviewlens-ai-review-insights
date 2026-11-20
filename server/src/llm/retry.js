@@ -8,7 +8,7 @@ export class LlmHttpError extends Error {
 }
 
 /** Rate limits (429), server errors (5xx), timeouts and network failures are worth retrying. */
-export function isRetryableError(err) {
+function isRetryableError(err) {
   if (err instanceof LlmHttpError) return err.status === 429 || err.status >= 500;
   return err?.name === 'TimeoutError' || err?.name === 'AbortError' || err instanceof TypeError;
 }
@@ -20,7 +20,7 @@ export function backoffDelay(attempt, baseDelayMs, random = Math.random, retryAf
   return Math.round(exponential + random() * baseDelayMs * 0.25);
 }
 
-export const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
  * Runs fn(); on a retryable error waits (1x, 2x, 4x, ... baseDelayMs) and tries again,

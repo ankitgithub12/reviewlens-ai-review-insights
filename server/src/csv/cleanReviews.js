@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { parse } from 'csv-parse/sync';
 
-export const REQUIRED_COLUMNS = ['review_text'];
+const REQUIRED_COLUMNS = ['review_text'];
 
 /** Thrown when the upload cannot be read as a reviews CSV at all (bad header, unparseable). */
 export class CsvFormatError extends Error {}

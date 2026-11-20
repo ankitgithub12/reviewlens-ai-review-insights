@@ -3,7 +3,7 @@ import { LlmHttpError, withRetry } from './retry.js';
 const MAX_RETRY_AFTER_MS = 60000;
 
 /** Returns the model's rejected text for a "json_validate_failed" error, otherwise null. */
-export function parseFailedGeneration(status, body) {
+function parseFailedGeneration(status, body) {
   if (status !== 400 || !body.includes('json_validate_failed')) return null;
   try {
     return String(JSON.parse(body)?.error?.failed_generation ?? '');
