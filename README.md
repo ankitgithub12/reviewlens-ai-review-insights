@@ -4,6 +4,12 @@ Upload a CSV of product reviews and get, on one screen: what customers love, wha
 about, and which reviews need a reply. Built with **React (Vite) + Node.js + Express** and any
 free-tier, OpenAI-compatible LLM API (Groq by default, Gemini also works).
 
+**Live demo:** https://client-two-kappa-pujq7fdlba.vercel.app (frontend on Vercel) ·
+API: https://reviewlens-ai-review-insights-backend.onrender.com/api/health (backend on Render)
+
+> The backend runs on Render's free plan, so after 15 minutes without traffic it sleeps. The first
+> request can then take up to a minute; upload `reviews.csv` from this repo to try it.
+
 ## Setup (fresh machine)
 
 Requirements: **Node.js 20+** (tested on Node 24) and a free LLM API key.
@@ -133,7 +139,8 @@ ReplyCell ──POST /api/reply──────▶ analysis/reply      on-clic
 
 **Bonus features:** rating-mismatch flag + agreement % (e.g. R008: 5★ but negative), a view per
 product (sentiment split, average rating, top issues, its reviews), a run log (AI calls, cache
-hits, retries, processing time), and Docker (`docker compose up` runs the whole app).
+hits, retries, processing time), Docker (`docker compose up` runs the whole app), and a live
+deployment (Vercel frontend + Render backend, links at the top).
 
 ## The prompt, and why it is designed this way
 
