@@ -41,6 +41,8 @@ npm run build && npm start   # production: one server on http://localhost:3001
 ```
 
 Open the URL, choose `reviews.csv` (in the repo root) and click **Analyse reviews**.
+More files to try (Hinglish, prompt injection, messy data, rating mismatch, bad files, 40 reviews)
+are in [`test-data/`](test-data/README.md), with the results to expect.
 
 ### Run with Docker
 

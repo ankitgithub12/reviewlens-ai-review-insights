@@ -1,0 +1,18 @@
+review_id,product,rating,date,review_text,source
+M01,Desk Lamp,5,2026-11-01,"Bright light with three brightness levels. Love it!",website
+M02,Desk Lamp,,2026-11-02,"Good lamp but the cable is too short.",website
+M03,Desk Lamp,4.5,2026-11-03,"Nice lamp, a bit wobbly on the desk.",app
+M04,Desk Lamp,0,2026-11-03,"Stopped working after a month.",app
+M05,Desk Lamp,10,2026-11-04,"Arrived quickly and works fine.",website
+M06,Desk Lamp,four,2026-11-04,"Decent value for the price.",website
+M07,Desk Lamp,5,2026-11-05,"   ",app
+M08,Desk Lamp,3,2026-11-05,"",app
+M09,Desk Lamp,4,2026-11-06,"<p>Great <b>product</b> &amp; fast shipping!</p>",website
+M10,Desk Lamp,4,2026-11-06,"GREAT product    &   fast shipping!",app
+,Desk Lamp,2,2026-11-07,"This row has no review id. The switch is very stiff.",website
+M12,,3,2026-11-07,"This row has no product name. The box arrived dented.",website
+M13,Desk Lamp,4,07/11/2026,"Wrong date format, but the lamp itself is fine.",app
+M14,Desk Lamp,1,2026-11-08,"A multi-line review:
+the base cracked on day one,
+and support said ""not our problem"".",website
+M15,Desk Lamp,5,2026-11-08,"Commas, everywhere, in this review, but it is still one field.",app

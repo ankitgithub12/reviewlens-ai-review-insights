@@ -1,0 +1,41 @@
+review_id,product,rating,date,review_text
+B01,Yoga Mat,5,2026-11-01,"Thick, non-slip and easy to roll up. Perfect for daily practice."
+B02,Yoga Mat,4,2026-11-02,"Good grip, but it had a strong rubber smell for the first few days."
+B03,Yoga Mat,2,2026-11-03,Started tearing at the edges after two weeks.
+B04,Yoga Mat,5,2026-11-04,"Mat bahut comfortable hai, knees ko dard nahi hota."
+B05,Yoga Mat,1,2026-11-05,"Ordered blue, received pink. Exchange request still pending after a week."
+B06,Yoga Mat,3,2026-11-06,It is okay for the price. Slightly thinner than described.
+B07,Yoga Mat,4,2026-11-07,Carry strap is useful and the mat cleans easily.
+B08,Yoga Mat,2,2026-11-08,"Slippery when I sweat, not good for hot yoga."
+B09,Yoga Mat,5,2026-11-09,"Best mat I have owned, worth every rupee."
+B10,Yoga Mat,1,2026-11-01,Delivery took 15 days and the box was crushed.
+B11,Smart Watch,5,2026-11-01,Battery lasts a full week and the heart rate tracking is accurate.
+B12,Smart Watch,2,2026-11-02,Strap broke within a month. Cheap plastic.
+B13,Smart Watch,4,2026-11-03,Display is bright even in sunlight. Notifications sometimes lag.
+B14,Smart Watch,1,2026-11-04,Stopped syncing with my phone after an update. Support has not replied in 6 days.
+B15,Smart Watch,3,2026-11-05,"Average watch, step count is not very accurate."
+B16,Smart Watch,5,2026-11-06,Sleep tracking is surprisingly good. Very happy with it.
+B17,Smart Watch,2,2026-11-07,"Too big for my wrist, the size chart was misleading."
+B18,Smart Watch,4,2026-11-08,"Good value for money, lots of watch faces."
+B19,Smart Watch,1,2026-11-09,Screen cracked on its own on day three. Refund please.
+B20,Smart Watch,5,2026-11-01,"Waterproof claim is true, I swim with it daily."
+B21,Coffee Grinder,5,2026-11-01,Grinds evenly and quickly. Morning coffee tastes much better now.
+B22,Coffee Grinder,3,2026-11-02,Works fine but it is very loud.
+B23,Coffee Grinder,1,2026-11-03,Motor burned out after a month of light use.
+B24,Coffee Grinder,4,2026-11-04,"Easy to clean, the grind settings are useful."
+B25,Coffee Grinder,2,2026-11-05,"Lid does not fit tightly, coffee powder flies everywhere."
+B26,Coffee Grinder,5,2026-11-06,"Compact and powerful, great for small kitchens."
+B27,Coffee Grinder,2,2026-11-07,"Overpriced for what it does, cheaper ones work the same."
+B28,Coffee Grinder,4,2026-11-08,Packaging was excellent and it arrived a day early.
+B29,Coffee Grinder,1,2026-11-09,"Wrong plug type for India, had to buy an adapter."
+B30,Coffee Grinder,5,2026-11-01,"Grinder ekdum badhiya hai, coffee ka swaad hi badal gaya."
+B31,Backpack,5,2026-11-01,Lots of compartments and the laptop sleeve is well padded.
+B32,Backpack,4,2026-11-02,"Comfortable straps, good for daily office use."
+B33,Backpack,2,2026-11-03,Zip got stuck in the first week.
+B34,Backpack,1,2026-11-04,Colour faded after one wash and the bag smells odd.
+B35,Backpack,5,2026-11-05,"Water resistant as promised, survived a heavy rain."
+B36,Backpack,3,2026-11-06,"Decent bag, a bit smaller than it looks in the photos."
+B37,Backpack,4,2026-11-07,"Stitching feels strong, should last a long time."
+B38,Backpack,2,2026-11-08,Customer support was rude when I asked about a replacement.
+B39,Backpack,5,2026-11-09,"Best backpack under 2000 rupees, highly recommend."
+B40,Backpack,1,2026-11-01,Received a used bag with someone else's receipt inside.
