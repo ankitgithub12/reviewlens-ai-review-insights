@@ -12,7 +12,8 @@ API: https://reviewlens-ai-review-insights-backend.onrender.com/api/health (back
 
 ## Setup (fresh machine)
 
-Requirements: **Node.js 20+** (tested on Node 24) and a free LLM API key.
+Requirements: **Node.js 20.19+ or 22.12+** (Vite 7 needs one of these; tested on Node 24) and a free
+LLM API key. Check with `node -v`.
 
 ```bash
 git clone <this-repo-url> reviewlens
