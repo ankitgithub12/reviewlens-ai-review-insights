@@ -179,7 +179,7 @@ function LoadingState() {
         </AnimatePresence>
       </div>
       <div className="kpi-grid">
-        {Array.from({ length: 5 }, (_, i) => (
+        {Array.from({ length: 6 }, (_, i) => (
           <div key={i} className="skeleton" />
         ))}
       </div>

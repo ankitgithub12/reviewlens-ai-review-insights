@@ -992,7 +992,7 @@ code {
 /* ---------- KPI cards ---------- */
 .kpi-grid {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 12px;
 }
 
@@ -1138,8 +1138,9 @@ code {
 
 .legend {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
-  gap: 8px;
+  gap: 4px 8px;
   margin-top: 6px;
   font-family: var(--mono);
   font-size: 11px;
@@ -1770,21 +1771,14 @@ tbody tr:hover {
 
 /* ---------- Responsive ---------- */
 
-/* Large laptops: KPI cards wrap to 3 + 2 */
-@media (max-width: 1280px) {
+/* Laptops: KPI cards wrap to 3 + 3 */
+@media (max-width: 1440px) {
   .kpi-grid {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
+}
 
-  .kpi-grid > * {
-    grid-column: span 2;
-  }
-
-  .kpi-grid > :nth-child(4),
-  .kpi-grid > :nth-child(5) {
-    grid-column: span 3;
-  }
-
+@media (max-width: 1280px) {
   .feature-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -1940,16 +1934,6 @@ tbody tr:hover {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .kpi-grid > *,
-  .kpi-grid > :nth-child(4),
-  .kpi-grid > :nth-child(5) {
-    grid-column: span 1;
-  }
-
-  .kpi-grid > :first-child {
-    grid-column: span 2;
-  }
-
   .scope-info {
     align-items: flex-start;
   }
@@ -1988,9 +1972,5 @@ tbody tr:hover {
   .kpi-grid,
   .run-stats dl {
     grid-template-columns: 1fr;
-  }
-
-  .kpi-grid > * {
-    grid-column: span 1 !important;
   }
 }

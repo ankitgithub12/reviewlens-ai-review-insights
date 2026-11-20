@@ -40,7 +40,16 @@ export default function SummaryCards({ summary, agreement, themes }) {
           <span className="kpi-count">({sentiment.positive.count})</span>
         </div>
         <p className="kpi-desc">{topPraise ? `Top praise: ${topPraise}` : 'No praise themes yet'}</p>
-        <FootRow label="Neutral share" value={`${sentiment.neutral.pct}%`} />
+      </Kpi>
+
+      <Kpi label="Neutral share" icon="sentiment_neutral" iconTone="warn">
+        <div className="kpi-value-row">
+          <span className="kpi-value">
+            <CountUp value={sentiment.neutral.pct} decimals={1} suffix="%" />
+          </span>
+          <span className="kpi-count">({sentiment.neutral.count})</span>
+        </div>
+        <p className="kpi-desc">Mixed or purely factual feedback</p>
       </Kpi>
 
       <Kpi label="Negative share" icon="sentiment_dissatisfied" iconTone="negative">
